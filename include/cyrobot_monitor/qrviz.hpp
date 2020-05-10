@@ -2,6 +2,7 @@
 #define QRVIZ_H
 
 #include <QVBoxLayout>
+#include <QException>
 #include <rviz/visualization_manager.h>
 #include <rviz/render_panel.h>
 #include <rviz/display.h>
@@ -14,7 +15,9 @@
 #include<rviz/tool_manager.h>
 #include <QThread>
 #include <QDebug>
-class QRviz:public QThread
+#include <QMainWindow>
+#include "rviz/window_manager_interface.h"
+class QRviz: public QMainWindow
 {
     Q_OBJECT
 public:
@@ -40,6 +43,10 @@ public:
     //显示robotmodel
     void Display_RobotModel(bool enable);
 private:
+
+    QVBoxLayout *layout;
+    QString nodename;
+protected:
     //rviz显示容器
     rviz::RenderPanel *render_panel_;
     rviz::VisualizationManager *manager_;
@@ -54,18 +61,12 @@ private:
     rviz::Display* Navigate_globalmap=NULL;
     rviz::Display* Navigate_globalplanner=NULL;
     rviz::Display* Navigate_amcl=NULL;
-
+    rviz::Display* RobotModel_=NULL;
     //rviz工具
     rviz::Tool *current_tool;
     //rviz工具控制器
     rviz::ToolManager *tool_manager_;
-    QVBoxLayout *layout;
-    QString nodename;
-private slots:
-    void addTool( rviz::Tool* );
 
- //   rviz::VisualizationManager *manager_=NULL;
-//    rviz::RenderPanel *render_panel_;
 
 };
 

@@ -9,12 +9,23 @@ QRviz::QRviz(QVBoxLayout *layout,QString node_name)
     char **argv;
     ros::init(argc,argv,"QRviz",ros::init_options::AnonymousName);
 
+
+
     //创建rviz容器
-    render_panel_=new rviz::RenderPanel;
+     render_panel_ = new rviz::RenderPanel;
     //向layout添加widget
-    layout->addWidget(render_panel_);
-    //初始化rviz控制对象
-    manager_=new rviz::VisualizationManager(render_panel_);
+      layout->addWidget(render_panel_);
+      try
+      {
+          //初始化rviz控制对象
+          manager_=new rviz::VisualizationManager(render_panel_);
+      }
+      catch(QException e)
+      {
+          qDebug()<<e.what();
+      }
+
+
     //获取当前rviz控制对象的 tool控制对象
     tool_manager_=manager_->getToolManager();
    //初始化camera 这行代码实现放大 缩小 平移等操作
@@ -24,7 +35,7 @@ QRviz::QRviz(QVBoxLayout *layout,QString node_name)
     manager_->removeAllDisplays();
 
 }
-  rviz::Display* RobotModel_=NULL;
+
 //显示robotModel
   void QRviz::Display_RobotModel(bool enable)
   {
@@ -141,7 +152,6 @@ void QRviz::Display_LaserScan(bool enable,QString topic)
      tool_manager_->setCurrentTool( current_tool );
      manager_->startUpdate();
 
-//     tool_manager_->setCurrentTool()
 
  }
  //设置机器人导航目标点
@@ -191,10 +201,7 @@ void QRviz::Display_LaserScan(bool enable,QString topic)
     manager_->startUpdate();
 
  }
- void QRviz::addTool( rviz::Tool* )
- {
 
- }
 void QRviz::createDisplay(QString display_name,QString topic_name)
 {
 
