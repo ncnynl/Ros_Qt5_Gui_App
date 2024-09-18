@@ -1,4 +1,5 @@
 #pragma once
+#include <cv_bridge/cv_bridge.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/Twist.h>
@@ -7,8 +8,10 @@
 #include <nav_msgs/Path.h>
 #include <ros/ros.h>
 #include <sensor_msgs/BatteryState.h>
+#include <sensor_msgs/Image.h>
 #include <sensor_msgs/LaserScan.h>
 #include <sensor_msgs/image_encodings.h>  //图像编码格式
+
 #include <tf/transform_listener.h>
 #include "virtual_channel_node.h"
 class RosNode : public VirtualChannelNode {
@@ -34,6 +37,7 @@ class RosNode : public VirtualChannelNode {
   void GlobalPathCallback(nav_msgs::Path::ConstPtr path);
   void LocalPathCallback(nav_msgs::Path::ConstPtr path);
   void BatteryCallback(sensor_msgs::BatteryState::ConstPtr path);
+  // void MbStatusCallback(actionlib_msgs::GoalStatusArray::ConstPtr msg);
   void PubRobotSpeed(const RobotSpeed &speed);
   void PubNavGoal(const RobotPose &pose);
   void PubRelocPose(const RobotPose &pose);
@@ -53,6 +57,8 @@ class RosNode : public VirtualChannelNode {
   ros::Subscriber global_path_subscriber_;
   ros::Subscriber local_path_subscriber_;
   ros::Subscriber battery_subscriber_;
+  ros::Subscriber move_base_status_subscriber_;
+  std::vector<ros::Subscriber> image_subscriber_list_;
   basic::OccupancyMap occ_map_;
 
   tf::TransformListener *tf_listener_;

@@ -10,6 +10,7 @@
 #include "mainwindow.h"
 #include <QDebug>
 #include <iostream>
+#include <opencv2/opencv.hpp>
 #include "AutoHideDockContainer.h"
 #include "DockAreaTabBar.h"
 #include "DockAreaTitleBar.h"
@@ -20,6 +21,7 @@
 #include "algorithm.h"
 #include "logger/logger.h"
 #include "ui_mainwindow.h"
+
 #include "widgets/speed_ctrl.h"
 using namespace ads;
 MainWindow::MainWindow(QWidget *parent)
@@ -78,10 +80,21 @@ void MainWindow::RecvChannelMsg(const MsgId &id, const std::any &data) {
                                  std::stod(map["voltage"]));
 
     } break;
+    case MsgId::kImage: {
+      auto location_to_mat = std::any_cast<std::pair<std::string, std::shared_ptr<cv::Mat>>>(data);
+
+      this->SlotRecvImage(location_to_mat.first, location_to_mat.second);
+    } break;
     default:
       break;
   }
   display_manager_->UpdateTopicData(id, data);
+}
+void MainWindow::SlotRecvImage(const std::string &location, std::shared_ptr<cv::Mat> data) {
+  if (image_frame_map_.count(location)) {
+    QImage image(data->data, data->cols, data->rows, data->step[0], QImage::Format_RGB888);
+    image_frame_map_[location]->setImage(image);
+  }
 }
 void MainWindow::SendChannelMsg(const MsgId &id, const std::any &data) {
   channel_manager_.SendMessage(id, data);
@@ -453,8 +466,8 @@ void MainWindow::setupUi() {
   center_widget->setLayout(center_layout);
   CDockWidget *CentralDockWidget = new CDockWidget("CentralWidget");
   CentralDockWidget->setWidget(center_widget);
-  auto *CentralDockArea = dock_manager_->setCentralWidget(CentralDockWidget);
-  CentralDockArea->setAllowedAreas(DockWidgetArea::OuterDockAreas);
+  center_docker_area_ = dock_manager_->setCentralWidget(CentralDockWidget);
+  center_docker_area_->setAllowedAreas(DockWidgetArea::OuterDockAreas);
 
   //////////////////////////////////////////////////////////速度仪表盘
   ads::CDockWidget *DashBoardDockWidget = new ads::CDockWidget("DashBoard");
@@ -464,7 +477,7 @@ void MainWindow::setupUi() {
   speed_dash_board_ = new DashBoard(speed_dashboard_widget);
   auto dashboard_area =
       dock_manager_->addDockWidget(ads::DockWidgetArea::LeftDockWidgetArea,
-                                   DashBoardDockWidget, CentralDockArea);
+                                   DashBoardDockWidget, center_docker_area_);
   ui->menuView->addAction(DashBoardDockWidget->toggleViewAction());
 
   ////////////////////////////////////////////////////////速度控制
@@ -491,10 +504,11 @@ void MainWindow::setupUi() {
   QPushButton *btn_add_one_goal = new QPushButton("Add Point");
   QHBoxLayout *horizontalLayout_15 = new QHBoxLayout();
   QPushButton *btn_start_task_chain = new QPushButton("Start Task Chain");
+  QCheckBox *loop_task_checkbox = new QCheckBox("Loop Task");
   QHBoxLayout *horizontalLayout_14 = new QHBoxLayout();
   horizontalLayout_15->addWidget(btn_add_one_goal);
   horizontalLayout_14->addWidget(btn_start_task_chain);
-
+  horizontalLayout_14->addWidget(loop_task_checkbox);
   QPushButton *btn_load_task_chain = new QPushButton("Load Task Chain");
   QPushButton *btn_save_task_chain = new QPushButton("Save Task Chain");
   QHBoxLayout *horizontalLayout_16 = new QHBoxLayout();
@@ -510,8 +524,8 @@ void MainWindow::setupUi() {
   nav_goal_list_dock_widget->setMinimumSize(200, 150);
   nav_goal_list_dock_widget->setMaximumSize(480, 9999);
   dock_manager_->addDockWidget(ads::DockWidgetArea::RightDockWidgetArea,
-                               nav_goal_list_dock_widget, CentralDockArea);
-  nav_goal_list_dock_widget->toggleView(true);
+                               nav_goal_list_dock_widget, center_docker_area_);
+  nav_goal_list_dock_widget->toggleView(false);
   connect(nav_goal_table_view_, &NavGoalTableView::signalSendNavGoal,
           [this](const RobotPose &pose) {
             SendChannelMsg(MsgId::kSetNavGoalPose, pose);
@@ -546,10 +560,10 @@ void MainWindow::setupUi() {
       btn_add_one_goal, &QPushButton::clicked,
       [this, nav_goal_list_dock_widget]() { nav_goal_table_view_->AddItem(); });
   connect(btn_start_task_chain, &QPushButton::clicked,
-          [this, btn_start_task_chain]() {
+          [this, btn_start_task_chain, loop_task_checkbox]() {
             if (btn_start_task_chain->text() == "Start Task Chain") {
               btn_start_task_chain->setText("Stop Task Chain");
-              nav_goal_table_view_->StartTaskChain();
+              nav_goal_table_view_->StartTaskChain(loop_task_checkbox->isChecked());
             } else {
               btn_start_task_chain->setText("Start Task Chain");
               nav_goal_table_view_->StopTaskChain();
@@ -568,10 +582,26 @@ void MainWindow::setupUi() {
       SIGNAL(signalCurrentSelectPointChanged(const TopologyMap::PointInfo &)),
       nav_goal_table_view_,
       SLOT(UpdateSelectPoint(const TopologyMap::PointInfo &)));
+
+  //////////////////////////////////////////////////////图片
+
+  for (auto one_image : Config::ConfigManager::Instacnce()->GetRootConfig().images) {
+    LOG_INFO("init image window location:" << one_image.location << " topic:" << one_image.topic);
+    image_frame_map_[one_image.location] = new RatioLayoutedFrame();
+    ads::CDockWidget *dock_widget = new ads::CDockWidget(std::string("image/" + one_image.location).c_str());
+    dock_widget->setWidget(image_frame_map_[one_image.location]);
+
+    dock_manager_->addDockWidget(ads::DockWidgetArea::RightDockWidgetArea,
+                                 dock_widget,
+                                 center_docker_area_);
+    dock_widget->toggleView(true);
+    ui->menuView->addAction(dock_widget->toggleViewAction());
+  }
+
   //////////////////////////////////////////////////////槽链接
 
   connect(this, SIGNAL(OnRecvChannelData(const MsgId &, const std::any &)),
-          this, SLOT(RecvChannelMsg(const MsgId &, const std::any &)));
+          this, SLOT(RecvChannelMsg(const MsgId &, const std::any &)), Qt::BlockingQueuedConnection);
   connect(display_manager_, &Display::DisplayManager::signalPub2DPose,
           [this](const RobotPose &pose) {
             SendChannelMsg(MsgId::kSetRelocPose, pose);
@@ -614,11 +644,11 @@ void MainWindow::setupUi() {
   });
   connect(edit_map_btn, &QToolButton::clicked, [this, tools_edit_map_widget, edit_map_btn]() {
     if (edit_map_btn->text() == "编辑地图") {
-      display_manager_->SetEditMapMode(Display::MapEditMode::kStartEdit);
+      display_manager_->SetEditMapMode(Display::MapEditMode::kNormal);
       edit_map_btn->setText("结束编辑");
       tools_edit_map_widget->show();
     } else {
-      display_manager_->SetEditMapMode(Display::MapEditMode::kStopEdit);
+      display_manager_->SetEditMapMode(Display::MapEditMode::kStop);
       edit_map_btn->setText("编辑地图");
       tools_edit_map_widget->hide();
     }
@@ -626,7 +656,7 @@ void MainWindow::setupUi() {
   connect(add_point_btn, &QToolButton::clicked, [this]() {
     display_manager_->SetEditMapMode(Display::MapEditMode::kAddPoint);
   });
-  connect(normal_cursor_btn, &QToolButton::clicked, [this]() { display_manager_->SetEditMapMode(Display::MapEditMode::kMove); });
+  connect(normal_cursor_btn, &QToolButton::clicked, [this]() { display_manager_->SetEditMapMode(Display::MapEditMode::kNormal); });
   connect(erase_btn, &QToolButton::clicked, [this]() { display_manager_->SetEditMapMode(Display::MapEditMode::kErase); });
   connect(draw_line_btn, &QToolButton::clicked, [this]() { display_manager_->SetEditMapMode(Display::MapEditMode::kDrawLine); });
   connect(add_region_btn, &QToolButton::clicked, [this]() { display_manager_->SetEditMapMode(Display::MapEditMode::kRegion); });
@@ -651,9 +681,13 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   // Delete dock manager here to delete all floating widgets. This ensures
   // that all top level windows of the dock manager are properly closed
   // write state
+
+  disconnect(this, SIGNAL(OnRecvChannelData(const MsgId &, const std::any &)),
+             this, SLOT(RecvChannelMsg(const MsgId &, const std::any &)));
   SaveState();
   dock_manager_->deleteLater();
   QMainWindow::closeEvent(event);
+  LOG_INFO("ros qt5 gui app close!");
 }
 void MainWindow::SaveState() {
   QSettings settings("state.ini", QSettings::IniFormat);

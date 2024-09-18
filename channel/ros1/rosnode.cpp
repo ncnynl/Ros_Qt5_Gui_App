@@ -7,6 +7,7 @@
  * @Description: ros1通讯类
  */
 #include "rosnode.h"
+#include <opencv2/opencv.hpp>
 #include "config/config_manager.h"
 RosNode::RosNode(/* args */) {
   SET_DEFAULT_TOPIC_NAME("NavGoal", "/move_base_simple/goal")
@@ -20,6 +21,15 @@ RosNode::RosNode(/* args */) {
   SET_DEFAULT_TOPIC_NAME("Odometry", "/odom")
   SET_DEFAULT_TOPIC_NAME("Speed", "/cmd_vel")
   SET_DEFAULT_TOPIC_NAME("Battery", "/battery")
+  SET_DEFAULT_TOPIC_NAME("MoveBaseStatus", "/move_base/status")
+  if (Config::ConfigManager::Instacnce()->GetRootConfig().images.empty()) {
+    Config::ConfigManager::Instacnce()->GetRootConfig().images.push_back(
+        Config::ImageDisplayConfig{.location = "front",
+                                   .topic = "/camera/rgb/image_raw",
+                                   .enable = true});
+
+  }
+  Config::ConfigManager::Instacnce()->StoreConfig();
   std::cout << "ros node start" << std::endl;
 }
 basic::RobotPose Convert(const geometry_msgs::Pose &pose) {
@@ -50,7 +60,7 @@ bool RosNode::Start() {
   int argc = 0;
   ros::init(argc, nullptr, "ros_qt5_gui_app", ros::init_options::AnonymousName);
   while (!ros::master::check()) {
-    std::cout << "wait ros master........" << std::endl;
+    LOG_ERROR("wait ros master........");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
   }
   ros::start();
@@ -85,6 +95,67 @@ void RosNode::init() {
                                       &RosNode::OdometryCallback, this);
   battery_subscriber_ = nh.subscribe(GET_TOPIC_NAME("Battery"), 1,
                                      &RosNode::BatteryCallback, this);
+
+  for (auto one_image_display : Config::ConfigManager::Instacnce()->GetRootConfig().images) {
+    LOG_INFO("image location:" << one_image_display.location << " topic:" << one_image_display.topic);
+    image_subscriber_list_.emplace_back(nh.subscribe(
+        one_image_display.topic, 1,
+        boost::function<void(const sensor_msgs::ImageConstPtr &)>(
+            [this, one_image_display](const sensor_msgs::ImageConstPtr &msg) {
+              cv::Mat conversion_mat_;
+              try {
+                // 深拷贝转换为opencv类型
+                cv_bridge::CvImageConstPtr cv_ptr = cv_bridge::toCvShare(
+                    msg, sensor_msgs::image_encodings::RGB8);
+                conversion_mat_ = cv_ptr->image;
+              } catch (cv_bridge::Exception &e) {
+                try {
+                  cv_bridge::CvImageConstPtr cv_ptr = cv_bridge::toCvShare(msg);
+                  if (msg->encoding == "CV_8UC3") {
+                    // assuming it is rgb
+                    conversion_mat_ = cv_ptr->image;
+                  } else if (msg->encoding == "8UC1") {
+                    // convert gray to rgb
+                    cv::cvtColor(cv_ptr->image, conversion_mat_, CV_GRAY2RGB);
+                  } else if (msg->encoding == "16UC1" ||
+                             msg->encoding == "32FC1") {
+                    double min = 0;
+                    double max = 10;
+                    if (msg->encoding == "16UC1") max *= 1000;
+                    // if (ui_.dynamic_range_check_box->isChecked()) {
+                    //   // dynamically adjust range based on min/max in image
+                    //   cv::minMaxLoc(cv_ptr->image, &min, &max);
+                    //   if (min == max) {
+                    //     // completely homogeneous images are displayed in gray
+                    //     min = 0;
+                    //     max = 2;
+                    //   }
+                    // }
+                    cv::Mat img_scaled_8u;
+                    cv::Mat(cv_ptr->image - min).convertTo(img_scaled_8u, CV_8UC1, 255. / (max - min));
+                    cv::cvtColor(img_scaled_8u, conversion_mat_, CV_GRAY2RGB);
+                  } else {
+                    LOG_ERROR("image from " << msg->encoding
+                                            << " to 'rgb8' an exception was thrown (%s)"
+                                            << e.what());
+                    return;
+                  }
+                } catch (cv_bridge::Exception &e) {
+                  LOG_ERROR(
+                      "image from "
+                      << msg->encoding
+                      << " to 'rgb8' an exception was thrown (%s)" << e.what());
+
+                  return;
+                }
+              }
+
+              OnDataCallback(MsgId::kImage, std::pair<std::string, std::shared_ptr<cv::Mat>>(one_image_display.location, std::make_shared<cv::Mat>(conversion_mat_)));
+            })));
+  }
+
+  // move_base_status_subscriber_ = nh.subscribe(GET_TOPIC_NAME("MoveBaseStatus"), 1,
+  //                                             &RosNode::BatteryCallback, this);
   tf_listener_ = new tf::TransformListener();
 }
 bool RosNode::Stop() {
@@ -93,37 +164,40 @@ bool RosNode::Stop() {
 }
 void RosNode::SendMessage(const MsgId &msg_id, const std::any &msg) {
   switch (msg_id) {
-  case MsgId::kSetNavGoalPose: {
-    auto pose = std::any_cast<basic::RobotPose>(msg);
-    std::cout << "recv nav goal pose:" << pose << std::endl;
+    case MsgId::kSetNavGoalPose: {
+      auto pose = std::any_cast<basic::RobotPose>(msg);
+      std::cout << "recv nav goal pose:" << pose << std::endl;
 
-    PubNavGoal(pose);
+      PubNavGoal(pose);
 
-  } break;
-  case MsgId::kSetRelocPose: {
-    auto pose = std::any_cast<basic::RobotPose>(msg);
-    std::cout << "recv reloc pose:" << pose << std::endl;
-    PubRelocPose(pose);
+    } break;
+    case MsgId::kSetRelocPose: {
+      auto pose = std::any_cast<basic::RobotPose>(msg);
+      std::cout << "recv reloc pose:" << pose << std::endl;
+      PubRelocPose(pose);
 
-  } break;
-  case MsgId::kSetRobotSpeed: {
-    auto speed = std::any_cast<basic::RobotSpeed>(msg);
-    std::cout << "recv speed pose:" << speed << std::endl;
-    PubRobotSpeed(speed);
+    } break;
+    case MsgId::kSetRobotSpeed: {
+      auto speed = std::any_cast<basic::RobotSpeed>(msg);
+      std::cout << "recv speed pose:" << speed << std::endl;
+      PubRobotSpeed(speed);
 
-  } break;
-  default:
-    break;
+    } break;
+    default:
+      break;
   }
 }
+
 void RosNode::BatteryCallback(sensor_msgs::BatteryState::ConstPtr battery) {
   std::map<std::string, std::string> map;
   map["percent"] = std::to_string(battery->percentage);
   map["voltage"] = std::to_string(battery->voltage);
   OnDataCallback(MsgId::kBatteryState, map);
 }
-void RosNode::OdometryCallback(const nav_msgs::Odometry::ConstPtr &msg) {
+// void RosNode::MbStatusCallback(actionlib_msgs::GoalStatusArray::ConstPtr msg) {
 
+// }
+void RosNode::OdometryCallback(const nav_msgs::Odometry::ConstPtr &msg) {
   basic::RobotState state =
       static_cast<basic::RobotState>(Convert(msg->pose.pose));
   state.vx = (double)msg->twist.twist.linear.x;
@@ -302,9 +376,9 @@ void RosNode::PubRelocPose(const RobotPose &pose) {
   geo_pose.header.stamp = ros::Time(0);
   geo_pose.pose.pose.position.x = pose.x;
   geo_pose.pose.pose.position.y = pose.y;
-  geometry_msgs::Quaternion q; // 初始化四元数（geometry_msgs类型）
+  geometry_msgs::Quaternion q;  // 初始化四元数（geometry_msgs类型）
   q = tf::createQuaternionMsgFromRollPitchYaw(
-      0, 0, pose.theta); // 欧拉角转四元数（geometry_msgs::Quaternion）
+      0, 0, pose.theta);  // 欧拉角转四元数（geometry_msgs::Quaternion）
   geo_pose.pose.pose.orientation = q;
   reloc_pose_publisher_.publish(geo_pose);
 }
@@ -314,9 +388,9 @@ void RosNode::PubNavGoal(const RobotPose &pose) {
   geo_pose.header.stamp = ros::Time(0);
   geo_pose.pose.position.x = pose.x;
   geo_pose.pose.position.y = pose.y;
-  geometry_msgs::Quaternion q; // 初始化四元数（geometry_msgs类型）
+  geometry_msgs::Quaternion q;  // 初始化四元数（geometry_msgs类型）
   q = tf::createQuaternionMsgFromRollPitchYaw(
-      0, 0, pose.theta); // 欧拉角转四元数（geometry_msgs::Quaternion）
+      0, 0, pose.theta);  // 欧拉角转四元数（geometry_msgs::Quaternion）
   geo_pose.pose.orientation = q;
   nav_goal_publisher_.publish(geo_pose);
 }
@@ -360,9 +434,8 @@ basic::RobotPose RosNode::GetTrasnsform(std::string from, std::string to) {
     ret.theta = yaw;
 
   } catch (tf2::TransformException &ex) {
-
-    // LOG_ERROR("getTrasnsform error from:" << from << " to:" << to
-    //                                          << " error:" << ex.what());
+    LOG_ERROR("getTrasnsform error from:" << from << " to:" << to
+                                          << " error:" << ex.what());
   }
   return ret;
 }

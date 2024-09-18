@@ -20,16 +20,19 @@
 #include <QToolBar>
 #include <QTreeView>
 #include <QWidgetAction>
+#include <opencv2/imgproc/imgproc.hpp>
 #include "DockAreaWidget.h"
 #include "DockManager.h"
 #include "DockWidget.h"
 #include "channel_manager.h"
+#include "config/config_manager.h"
 #include "display/manager/display_manager.h"
 #include "point_type.h"
 #include "widgets/dashboard.h"
 #include "widgets/nav_goal_table_view.h"
 #include "widgets/set_pose_widget.h"
 #include "widgets/speed_ctrl.h"
+#include "widgets/ratio_layouted_frame.h"
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -49,6 +52,7 @@ class MainWindow : public QMainWindow {
   void updateOdomInfo(RobotState state);
   void RestoreState();
   void SlotSetBatteryStatus(double percent, double voltage);
+  void SlotRecvImage(const std::string &location, std::shared_ptr<cv::Mat> data);
 
  protected:
   virtual void closeEvent(QCloseEvent *event) override;
@@ -71,9 +75,11 @@ class MainWindow : public QMainWindow {
   NavGoalTableView *nav_goal_table_view_;
   QProgressBar *battery_bar_;
   QLabel *label_power_;
+  ads::CDockAreaWidget *center_docker_area_;
+  std::map<std::string, RatioLayoutedFrame *> image_frame_map_;
  signals:
   void OnRecvChannelData(const MsgId &id, const std::any &data);
- 
+  
  private:
   void setupUi();
   bool openChannel();

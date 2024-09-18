@@ -1,6 +1,8 @@
 #include "config/config_manager.h"
 #include <QFile>
+#include <boost/dll.hpp>
 #include <fstream>
+
 #include "boost/filesystem.hpp"
 namespace Config {
 bool ConfigManager::writeStringToFile(const std::string &filePath,
@@ -36,7 +38,11 @@ void ConfigManager::Init(const std::string &config_path) {
   }
   ReadRootConfig();
 }
-ConfigManager::~ConfigManager() {}
+ConfigManager::~ConfigManager() {
+  std::string pretty_json = JS::serializeStruct(config_root_);
+  std::cout << "write json" << std::endl;
+  writeStringToFile(config_path_, pretty_json);
+}
 bool ConfigManager::ReadRootConfig() {
   std::lock_guard<std::mutex> lock(mutex_);
   std::ifstream file(config_path_);
@@ -52,7 +58,7 @@ bool ConfigManager::ReadRootConfig() {
   }
   return true;
 }
-bool ConfigManager::WriteRootConfig() {
+bool ConfigManager::StoreConfig() {
   std::lock_guard<std::mutex> lock(mutex_);
   std::string pretty_json = JS::serializeStruct(config_root_);
   writeStringToFile(config_path_, pretty_json);
@@ -83,14 +89,27 @@ void ConfigManager::SetDefaultTopicName(const std::string &frame_name,
   } else if (iter->topic == "") {
     iter->topic = topic_name;
   }
-  WriteRootConfig();
+  StoreConfig();
 }
 
 bool ConfigManager::ReadTopologyMap(const std::string &map_path,
                                     TopologyMap &map) {
   std::lock_guard<std::mutex> lock(mutex_);
+  std::string fullPath = map_path;
+  boost::filesystem::path inputPathObj(map_path);
+  // 判断路径是否为相对路径
+  if (inputPathObj.is_relative()) {
+    // 获取当前可执行程序的路径
+    boost::filesystem::path executablePath = boost::dll::program_location();
 
-  std::ifstream file(map_path);
+    // 使用 absolute 函数将相对路径转换为绝对路径
+    boost::filesystem::path absolutePath = boost::filesystem::absolute(inputPathObj, executablePath.parent_path());
+
+    // 将路径转换为字符串
+    fullPath = absolutePath.string();
+  }
+
+  std::ifstream file(fullPath);
   std::string json((std::istreambuf_iterator<char>(file)),
                    std::istreambuf_iterator<char>());
   file.close();
@@ -107,8 +126,21 @@ bool ConfigManager::ReadTopologyMap(const std::string &map_path,
 bool ConfigManager::WriteTopologyMap(const std::string &map_path,
                                      const TopologyMap &topology_map) {
   std::lock_guard<std::mutex> lock(mutex_);
+  std::string fullPath = map_path;
+  boost::filesystem::path inputPathObj(map_path);
+  // 判断路径是否为相对路径
+  if (inputPathObj.is_relative()) {
+    // 获取当前可执行程序的路径
+    boost::filesystem::path executablePath = boost::dll::program_location();
+
+    // 使用 absolute 函数将相对路径转换为绝对路径
+    boost::filesystem::path absolutePath = boost::filesystem::absolute(inputPathObj, executablePath.parent_path());
+
+    // 将路径转换为字符串
+    fullPath = absolutePath.string();
+  }
   std::string pretty_json = JS::serializeStruct(topology_map);
-  return writeStringToFile(map_path, pretty_json);
+  return writeStringToFile(fullPath, pretty_json);
 }
 
 }  // namespace Config

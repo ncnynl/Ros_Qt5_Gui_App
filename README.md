@@ -6,7 +6,7 @@
  * @FilePath: /ROS2_Qt5_Gui_App/README.md
 -->
 简体中文 | [English](./README_en.md)
-## 轻量级ROS1/ROS2移动机器人人机交互软件
+*轻量级ROS1/ROS2移动机器人人机交互软件*
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/chengyangkj/Ros_Qt5_Gui_App?style=flat-square)
 ![GitHub stars](https://img.shields.io/github/stars/chengyangkj/Ros_Qt5_Gui_App?style=flat-square)
@@ -19,6 +19,7 @@
 ![humble](https://github.com/chengyangkj/Ros_Qt5_Gui_App/actions/workflows/ros_humble_build.yaml/badge.svg)
 ![foxy](https://github.com/chengyangkj/Ros_Qt5_Gui_App/actions/workflows/ros_foxy_build.yaml/badge.svg)
 ![noetic](https://github.com/chengyangkj/Ros_Qt5_Gui_App/actions/workflows/ros_noetic_build.yaml/badge.svg)
+![galactic](https://github.com/chengyangkj/Ros_Qt5_Gui_App/actions/workflows/ros_galactic_build.yaml/badge.svg)
 ![melodic](https://github.com/chengyangkj/Ros_Qt5_Gui_App/actions/workflows/ros_melodic_build.yaml/badge.svg)
 
 
@@ -40,28 +41,31 @@
 
 功能/TODO:
   
-| 功能                        | 状态 | 备注 |
-| --------------------------- | ---- | ---- |
-| ROS1/ROS2通信               | ✅    |      |
-| 全局/局部地图显示           | ✅    |      |
-| 机器人实时位置显示          | ✅    |      |
-| 机器人速度仪表盘            | ✅    |      |
-| 机器人手动控制              | ✅    |      |
-| 机器人重定位                | ✅    |      |
-| 机器人单点/多点导航         | ✅    |      |
-| 机器人全局/局部规划轨迹显示 | ✅    |      |
-| 机器人拓扑地图功能          | ✅    |      |
-| 电池电量显示                | ✅    |      |
-| 地图编辑功能                | ✅    |      |
-| 机器人导航任务链            | ✅    |      |
-| 地图加载                    | ✅    |      |
-| 地图保存                    | ✅    |      |
-| 基于protobuf的通信          | 🏷️    |      |
-| 鹰眼视图                    | 🏷️    |      |
-| 3D图层显示                  | 🏷️    |      |
-| 相机图像显示                | 🏷️    |      |
-| 拓扑点位的路径规划                | 🏷️    |      |
-大家如果有什么有意思的界面/功能性需求,可以提在[此处](https://github.com/chengyangkj/Ros_Qt5_Gui_App/issues/29),如有Bug请提在[issues](https://github.com/chengyangkj/Ros_Qt5_Gui_App/issues),必将尽快修复!请在也欢迎大家发起Merge Request一起参与项目建设~
+| 功能                        | 状态 | 备注                 |
+| --------------------------- | ---- | -------------------- |
+| ROS1/ROS2通信               | ✅    |                      |
+| 全局/局部地图显示           | ✅    |                      |
+| 机器人实时位置显示          | ✅    |                      |
+| 机器人速度仪表盘            | ✅    |                      |
+| 机器人手动控制              | ✅    |                      |
+| 机器人重定位                | ✅    |                      |
+| 机器人单点/多点导航         | ✅    |                      |
+| 机器人全局/局部规划轨迹显示 | ✅    |                      |
+| 机器人拓扑地图功能          | ✅    |                      |
+| 电池电量显示                | ✅    |                      |
+| 地图编辑功能                | ✅    |                      |
+| 机器人导航任务链            | ✅    | 尚存bug              |
+| 地图加载                    | ✅    |                      |
+| 地图保存                    | ✅    |                      |
+| 相机图像显示                | ✅    | 移植自rqt_image_view |
+| 机器人车身轮廓显示          | ✅    | 支持配置异形车身     |
+| 基于rosbridge的通信         | ✍    |                      |
+| 3D图层显示                  | 🏷️    |                      |
+| 拓扑点位的路径规划          | 🏷️    |                      |
+| 机器人历史轨迹录制          | 🏷️    |                      |
+
+
+大家如果有什么有意思的界面/功能性需求,可以提在[此处](https://github.com/chengyangkj/Ros_Qt5_Gui_App/issues/29),如有Bug请提在[issues](https://github.com/chengyangkj/Ros_Qt5_Gui_App/issues),必将尽快修复!也非常欢迎大家发起Merge Request一起参与项目建设~
 
 此仓库国内加速镜像链接:[gitee](https://gitee.com/chengyangkj/Ros_Qt5_Gui_App)
 
@@ -71,38 +75,46 @@
     <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=chengyangkj/Ros_Qt5_Gui_App&type=Timeline" width="75%" />
   </picture>
 
-## 项目截图
+*项目截图*
 
 ![image.png](./doc/images/main.png)
 
 ![image.png](./doc/images/main.gif)
 
+基于flutter的ROS1/ROS2跨平台移动机器人人机交互软件已正式开源:
+![flutter.png](./doc/images/flutter.png)
+如有需要请移步至[ROS_Flutter_Gui_App](https://github.com/chengyangkj/ROS_Flutter_Gui_App)
+
+*目录*
+
 <!-- TOC -->
-## 目录
 
 - [一,Release 版本下载使用](#一release-版本下载使用)
 - [二,编译](#二编译)
-  - [1,环境安装](#1环境安装)
-  - [2,克隆/下载本项目:](#2克隆下载本项目)
-  - [3,编译项目](#3编译项目)
-  - [4,运行项目](#4运行项目)
+    - [1 ,环境安装](#1-环境安装)
+    - [2 ,克隆/下载本项目:](#2-克隆下载本项目)
+    - [3 ,编译项目](#3-编译项目)
+    - [4 ,运行项目](#4-运行项目)
+    - [4 ,运行项目](#4-运行项目)
 - [三,IDE配置说明(QtCreator/Vscode)](#三ide配置说明qtcreatorvscode)
-    - [3.1 QtCreator打开项目教程](#31-qtcreator打开项目教程)
+        - [3.1 QtCreator打开项目教程](#31-qtcreator打开项目教程)
 - [四,使用说明](#四使用说明)
-    - [4.1,多机通信配置](#41多机通信配置)
-    - [4.2,配置文件](#42配置文件)
-    - [4.3,重定位位姿态发布](#43重定位位姿态发布)
-    - [4.4,地图编辑](#44地图编辑)
-      - [4.4.1 拓扑地图(机器人导航点设置)](#441-拓扑地图机器人导航点设置)
-      - [4.4.2 橡皮擦](#442-橡皮擦)
-      - [4.4.3 画笔](#443-画笔)
-      - [4.4.4 线段绘制](#444-线段绘制)
-      - [4.4.5 地图保存](#445-地图保存)
-      - [4.4.6 地图加载](#446-地图加载)
-    - [4.5,手动控制机器人](#45手动控制机器人)
-    - [4.6,速度仪表盘](#46速度仪表盘)
-    - [4.7,电池电量显示](#47电池电量显示)
+    - [4.1 ,多机通信配置](#41-多机通信配置)
+    - [4.2 ,配置文件](#42-配置文件)
+    - [4.3 ,重定位位姿态发布](#43-重定位位姿态发布)
+    - [4.4 ,地图编辑](#44-地图编辑)
+        - [4.4.1 拓扑地图(机器人导航点设置)](#441-拓扑地图机器人导航点设置)
+        - [4.4.2 橡皮擦](#442-橡皮擦)
+        - [4.4.3 画笔](#443-画笔)
+        - [4.4.4 线段绘制](#444-线段绘制)
+        - [4.4.5 地图保存](#445-地图保存)
+        - [4.4.6 地图加载](#446-地图加载)
+    - [4.5 ,手动控制机器人](#45-手动控制机器人)
+    - [4.6 ,速度仪表盘](#46-速度仪表盘)
+    - [4.7 ,电池电量显示](#47-电池电量显示)
     - [4.8 多点连续导航](#48-多点连续导航)
+    - [4.9 ,相机图片显示](#49-相机图片显示)
+    - [4.10 ,机器人车身轮廓显示](#410-机器人车身轮廓显示)
 - [五,相关链接](#五相关链接)
 - [六,相关教程及交流群](#六相关教程及交流群)
 
@@ -121,14 +133,14 @@
 ```
 sudo chmod a+x ./ros_qt5_gui_app
 ./ros_qt5_gui_app
-
 ```
 如果Release版本下载后使用不了，可以参考[二,编译](#二编译)进行自行编译使用
 
 # 二,编译
 
 
-注意，为了保证此项目同时兼容ROS1与ROS2，此项目不使用ROS1/ROS2的catkin_make/colcon构建系统进行够建，而是使用标准CMake进行构建，这也就意味着，本项目不会被ROS自动识别为功能包
+
+>💡 注意，为了保证此项目同时兼容ROS1与ROS2，此项目不使用ROS1/ROS2的catkin_make/colcon构建系统进行够建，而是使用标准CMake进行构建，这也就意味着，本项目不会被ROS自动识别为功能包
 可以参考以下教程从0开始构建/运行此项目:
 
 ## 1,环境安装 
@@ -137,14 +149,13 @@ sudo chmod a+x ./ros_qt5_gui_app
 
 ```
 sudo apt-get update
-sudo apt-get install qtbase5-private-dev libqt5svg5-dev -y
+sudo apt-get install qtbase5-private-dev libqt5svg5-dev libsdl-image1.2-dev libsdl1.2-dev -y
 ```
 
 如果以上安装后还不行，可以执行如下指令安装全部依赖:
 
 ```
-sudo apt-get install qtbase5-dev qt5-qmake qtbase5-dev-tools libqt5svg5-dev qtbase5-private-dev libeigen3-dev libgtest-dev -y
-
+sudo apt-get install qtbase5-dev qt5-qmake qtbase5-dev-tools libqt5svg5-dev qtbase5-private-dev libeigen3-dev libgtest-dev libsdl-image1.2-dev libsdl1.2-dev -y
 ```
 
 ## 2,克隆/下载本项目:
@@ -199,25 +210,24 @@ cd ~/qt_ws/ROS2_Qt5_Gui_App/build
 
 ```
 
-软件配置文件路径(运行一次软件后会自动生成在可执行程序相对路径下):
-
-```
-
-~/qt_ws/ROS2_Qt5_Gui_App/build/config.json
-
-```
+软件配置文件路径(运行一次软件后会自动生成在可执行程序相对路径下)
 
 # 三,IDE配置说明(QtCreator/Vscode)
 
-==此部分为针对新手做的温馨提示,如果你已经是一个ROS/C++/Qt老手,可以跳过此部分==
 
-很多ROS初学者学习Qt都存在一个误区:拼命的去下载QtCreator,如果QtCreator有问题安装失败,就卡在这,影响学习进度,但是其实QtCreator与Vscode一样,可以把他当作一个纯文本编辑器.
+>💡  此部分为针对新手做的温馨提示,如果你已经是一个ROS/C++/Qt老手,可以跳过此部分
+
+
+很多ROS初学者学习Qt都存在一个误区:没有搞清楚IDE与编译器的区别，像QtCreator，Vscode，CLion之类的均为IDE（[什么是IDE](https://www.zhihu.com/question/24833708)）
+哪怕不用IDE，我们只用文本编辑器也能实现代码的编写(效率很低，没有代码提示)，编写之后使用make指令编译即可
+
 实际上Ubuntu系统默认都自带的有Qt库,就比如前面的[3,编译项目](#3编译项目),并没有要求安装QtCreator,只需要使用apt-get安装一些系统缺失的,没有默认安装的qt库,就能正常编译通过
 
-当然安装QtCreator时也会同时下载一些Qt库,但是他仅仅是下载,如果你没有将下载的库添加到环境变量中(==通常也不建议自己将下载的qt库添加到环境变量中,这样需要处理系统默认的qt库与你添加的qt库的冲突问题==),所以,在没有额外配置的情况下,虽然下载了QtCreator,但是在编译代码时用的还是系统默认的库.
+当然安装QtCreator时也会同时下载一些Qt库,但是他仅仅是下载,如果你没有将下载的库添加到环境变量中(通常也不建议自己将下载的qt库添加到环境变量中,这样需要处理系统默认的qt库与你添加的qt库的冲突问题),所以,在没有额外配置的情况下,虽然下载了QtCreator,但是在编译代码时用的还是系统默认的库.
 
 那么,我们为什么还要去额外下载QtCreator呢?
-因为我们需要使用QtCreator去编辑我们的(.ui),(.resource)文件
+
+因为我们需要使用QtCreator去编辑我们的(.ui),(.resource)文件，同时QtCreator还提供了代码提示，代码跳转等功能。但是这些功能，只要是IDE均有这个功能，我们通过Vscode/Clion安装一些插件，也是能够实现这些功能，只是QtCreator对自家的语言支持的比较好，比较方便
 
 本项目所有的界面,都是在代码中去手动创建,如果打开代码中的mainwindow.ui可以发现什么都没有,因为所有界面都是代码动态创建添加上去的.
 
@@ -270,9 +280,10 @@ qtcretor
 
 # 四,使用说明
 
-### 4.1,多机通信配置
+## 4.1,多机通信配置
 
-针对于ROS新手的温馨提示:此项配置,如果是单机使用即本软件运行在机器人身上,没有跨机器使用就不用配置，直接跳过即可.如果需要将本软件运行在自己的笔记本上,去连接远程的机器人的情况下需要进行配置
+>💡  针对于ROS新手的温馨提示:此项配置,如果是单机使用即本软件运行在机器人身上,没有跨机器使用就不用配置，直接跳过即可.如果需要将本软件运行在自己的笔记本上,去连接远程的机器人的情况下需要进行配置
+
 
 ROS1/ROS2的多机通信完全依赖ROS原生(环境变量添加ROS_MASTER_URI与ROS_IP/ROS_DOMAINID),不再由用户手动指定,减轻新手使用负担
 
@@ -284,12 +295,12 @@ ROS2:
 
 环境变量多机配置相同的ROS_DOMAINID
 
-### 4.2,配置文件
+## 4.2,配置文件
 
-第一次运行后，会在可执行程序同级目录生成config.json,修改此配置文件即可(需要注意Json格式),修改后重启生效,具体配置说明详见[配置文件说明](./doc/config.md)
+第一次运行后，会在可执行程序同级目录生成config.json,修改此配置文件即可(需要注意Json格式),修改后重启生效,具体配置说明详见各功能的配置说明
 
 
-### 4.3,重定位位姿态发布
+## 4.3,重定位位姿态发布
 
 程序可以拖动式的设置机器人初始位置（重定位）,相对于Rviz,拖动时可以实时查看激光匹配情况,重定位更加精准(左键按住拖动,右键旋转方向)
 
@@ -309,14 +320,14 @@ ROS2:
 为自己机器人监听的重定位Topic名称
 
 
-### 4.4,地图编辑
+## 4.4,地图编辑
 
 程序支持地图编辑功能:
 
 ![image.png](./doc/images/edit_map.png)
 ![image.png](./doc/images/edit_map2.png)
 
-#### 4.4.1 拓扑地图(机器人导航点设置)
+### 4.4.1 拓扑地图(机器人导航点设置)
 并且程序支持拓扑地图功能,可以拖动式的设置机器人导航目标点（导航）使用gif说明如下:
 
 ![image.png](./doc/images/set_nav_goal.gif)
@@ -332,20 +343,20 @@ ROS2:
 ```
 为自己机器人监听的导航目标点Topic名称
 
-#### 4.4.2 橡皮擦
+### 4.4.2 橡皮擦
 
 点击橡皮擦后,可以擦除地图中的障碍物,使用gif说明如下:
 ![image.png](./doc/images/erase.gif)
 
-#### 4.4.3 画笔
+### 4.4.3 画笔
 画笔功能
 ![image.png](./doc/images/pencil.gif)
 
-#### 4.4.4 线段绘制
+### 4.4.4 线段绘制
 线段绘制
 ![image.png](./doc/images/draw_line.gif)
 
-#### 4.4.5 地图保存
+### 4.4.5 地图保存
 
 地图编辑完成后并不会自动保存,需要点击保存按钮,保存地图到指定文件夹,如果需要在ROS中使用，需要将该地图替换到自己对应导航包的map中
 
@@ -357,11 +368,11 @@ ROS2:
 
 ![image.png](./doc/images/save_map.png)
 
-#### 4.4.6 地图加载
+### 4.4.6 地图加载
 
 地图加载同理 用户选择对应的PGM地图文件即可加载，并进行编辑
 
-### 4.5,手动控制机器人
+## 4.5,手动控制机器人
 
 软件支持发布实时速度到底盘:
 
@@ -381,7 +392,7 @@ ROS2:
 ```
 为实际机器人监听的速度控制话题
 
-### 4.6,速度仪表盘
+## 4.6,速度仪表盘
 
 软件支持实时显示机器人速度:
 
@@ -399,7 +410,7 @@ ROS2:
 
 为机器人时机发布的里程计话题
 
-### 4.7,电池电量显示
+## 4.7,电池电量显示
 
 软件支持实时显示机器人电量,在配置中配置话题名，电池电量的Topic类型为:sensor_msgs::BatteryState
 
@@ -412,7 +423,7 @@ ROS2:
 ```
 ![image.png](./doc/images/battery_state.png)
 
-### 4.8 多点连续导航
+## 4.8 多点连续导航
 
 软件支持多点连续导航,使用方法如下:
 
@@ -422,6 +433,183 @@ ROS2:
 
 ![image.png](./doc/images/main.gif)
 
+## 4.9,相机图片显示
+
+软件支持实时显示机器人相机图片,在配置中配置话题名及location:
+
+```
+  "images": [ ], //图片列表 支持多路 配置后自动创建界面
+
+```
+
+软件移植了rqt image view的图片显示功能,支持实时显示多路机器人相机图片,在配置中配置话题名
+
+配置demo:
+
+```
+
+  "images": [
+    {
+      "location": "front",
+      "topic": "/camera/rgb/image_raw",
+      "enable": true
+    },
+    {
+      "location": "front/depth",
+      "topic": "/camera/depth/image_raw",
+      "enable": true
+    }
+  ],
+
+```
+
+![image.png](./doc/images/show_image.png)
+
+![image.png](./doc/images/show_image.gif)
+
+
+## 4.10,机器人车身轮廓显示
+
+车身尺寸位于配置:"robot_shape_config":
+
+``` 
+
+  "robot_shape_config": {
+    "shaped_points": [],  //轮廓点
+    "is_ellipse": false,  //轮廓是否为椭圆
+    "color": "0x0000FF",   //轮廓填充颜色
+    "opacity": 0.5     //轮廓透明度
+  }
+
+```
+
+配置前，首先需要以车中心为原点，使用如下坐标系计算车身轮廓的每个点(单位m)，支持异形车身:
+
+```
+
+                    ^x
+                    |
+                    |
+                    |
+          (0.5,0.5) |     (0.5,-0.5)
+            +---------------+
+            |       |       |
+            |       |       |
+            |       |       |
+<----------------------------------------+
+y           |       |       |
+            |       |       |
+            |       |       |
+            |       |       |
+            +---------------+
+        (-0.5,0.5)  |       (-0.5,-0.5)
+                    |
+                    |
+
+
+```
+
+随意找一个点作为起始点,按照顺时针,依次填下每个点
+
+配置demo:
+
+- 1m*1m车身:
+
+```
+  "robot_shape_config": {
+    "shaped_points": [
+      {
+        "x": 0.5,
+        "y": 0.5
+      },
+      {
+        "x": 0.5,
+        "y": -0.5
+      },
+      {
+        "x": -0.5,
+        "y": -0.5
+      },
+      {
+        "x": -0.5,
+        "y": 0.5
+      }
+    ],
+    "is_ellipse": false,
+    "color": "0x00000FF",
+    "opacity": 0.5
+  }
+
+```
+
+![image.png](./doc/images/shape1.png)
+
+- 1m*1m 圆形车身:
+
+is_ellipse=true
+
+```
+  "robot_shape_config": {
+    "shaped_points": [
+      {
+        "x": 0.5,
+        "y": 0.5
+      },
+      {
+        "x": 0.5,
+        "y": -0.5
+      },
+      {
+        "x": -0.5,
+        "y": -0.5
+      },
+      {
+        "x": -0.5,
+        "y": 0.5
+      }
+    ],
+    "is_ellipse": true,
+    "color": "0x00000FF",
+    "opacity": 0.5
+  }
+
+```
+![image.png](./doc/images/shape_cicle.png)
+
+- 异形车身:
+  
+```
+  "robot_shape_config": {
+    "shaped_points": [
+      {
+        "x": 0.5,
+        "y": 0.5
+      },
+      {
+        "x": 1,
+        "y": 0
+      },
+      {
+        "x": 0.5,
+        "y": -0.5
+      },
+      {
+        "x": -0.5,
+        "y": -0.5
+      },
+      {
+        "x": -0.5,
+        "y": 0.5
+      }
+    ],
+    "is_ellipse": false,
+    "color": "0x00000FF",
+    "opacity": 0.5
+  }
+
+```
+
+![image.png](./doc/images/shape2.png)
 
 # 五,相关链接
 
